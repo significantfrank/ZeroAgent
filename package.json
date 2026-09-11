@@ -1,0 +1,23 @@
+{
+  "name": "zero-agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Monorepo for ZeroAgent: a ReAct agent loop on the OpenAI Responses API.",
+  "packageManager": "pnpm@11.23.0",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "tsc -b --clean && node -e \"const{rmSync}=require('node:fs');for(const p of ['agent-loop','cli'])rmSync('packages/'+p+'/dist',{recursive:true,force:true})\"",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm build && pnpm -r test",
+    "demo": "pnpm --filter @zero-agent/agent-loop demo",
+    "cli": "tsc -b && node packages/cli/dist/cli.js"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^6.0.0"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "name": "@zero-agent/agent-loop",
+  "version": "0.1.0",
+  "description": "Zero-dependency ReAct agent loop on the OpenAI Responses API, with streaming reasoning / content / tool-call channels kept separate.",
+  "keywords": [
+    "openai",
+    "responses-api",
+    "react",
+    "agent",
+    "streaming",
+    "llm",
+    "tool-calling"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -b tsconfig.json",
+    "typecheck": "tsc -b tsconfig.json && tsc -p tsconfig.test.json",
+    "test": "node --test \"test/**/*.test.ts\"",
+    "demo": "node examples/demo.ts"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^6.0.0"
+  }
+}

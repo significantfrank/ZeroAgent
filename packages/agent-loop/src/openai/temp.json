@@ -1,0 +1,110 @@
+{
+    "model": "deepseek-chat",
+    "input": [
+        {
+            "type": "message",
+            "role": "user",
+            "content": [
+                {
+                    "type": "input_text",
+                    "text": "hi"
+                }
+            ]
+        },
+        {
+            "type": "message",
+            "role": "assistant",
+            "content": [
+                {
+                    "type": "output_text",
+                    "text": "Hi! How can I help you today?"
+                }
+            ]
+        },
+        {
+            "type": "message",
+            "role": "user",
+            "content": [
+                {
+                    "type": "input_text",
+                    "text": "我刚才问了什么问题"
+                }
+            ]
+        }
+    ],
+    "reasoning": {
+        "effort": "low",
+        "summary": "auto"
+    },
+    "store": false,
+    "tools": [
+        {
+            "type": "function",
+            "name": "calculator",
+            "description": "Evaluate an arithmetic expression and return the numeric result. Supports + - * / % ^ (and ** for power), parentheses, the constants pi/e/tau, and functions such as sqrt, abs, min, max, round, floor, ceil, log, exp, sin, cos, tan.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "expression": {
+                        "type": "string",
+                        "description": "The expression to evaluate, e.g. \"(17 * 3 + 4) / 5\" or \"sqrt(2) * 10\".",
+                        "minLength": 1
+                    }
+                },
+                "required": [
+                    "expression"
+                ],
+                "additionalProperties": false
+            }
+        },
+        {
+            "type": "function",
+            "name": "current_time",
+            "description": "Get the current date and time. Optionally pass an IANA time zone name (for example \"Asia/Shanghai\" or \"UTC\") to get the time in that zone.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "timezone": {
+                        "type": "string",
+                        "description": "IANA time zone name. Defaults to UTC."
+                    }
+                },
+                "required": [],
+                "additionalProperties": false
+            }
+        },
+        {
+            "type": "function",
+            "name": "memory",
+            "description": "Read and write short notes that persist for the duration of the task. Use \"set\" to store a key/value pair, \"get\" to read one back, \"list\" to see all keys, and \"delete\" to remove one.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "action": {
+                        "type": "string",
+                        "enum": [
+                            "set",
+                            "get",
+                            "list",
+                            "delete"
+                        ]
+                    },
+                    "key": {
+                        "type": "string",
+                        "description": "Required for \"set\", \"get\" and \"delete\"."
+                    },
+                    "value": {
+                        "type": "string",
+                        "description": "Required for \"set\"."
+                    }
+                },
+                "required": [
+                    "action"
+                ],
+                "additionalProperties": false
+            }
+        }
+    ],
+    "parallel_tool_calls": false,
+    "stream": true
+}
