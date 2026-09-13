@@ -170,7 +170,7 @@ export class ResponsesClient {
     options: RequestOptions = {},
   ): AsyncGenerator<ResponseStreamEvent, void, void> {
     const body = JSON.stringify({ ...request, stream: true });
-    console.log('=====> ' + body);
+    // console.log('=====> ' + body);
     const signal = this.#combineSignals(options.signal);
     // Built once, outside the retry loop: a configuration problem such as a
     // missing API key must surface as itself, not as a retryable connection
