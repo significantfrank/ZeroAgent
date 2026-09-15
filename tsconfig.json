@@ -1,7 +1,14 @@
 {
   "files": [],
   "references": [
-    { "path": "packages/agent-loop" },
-    { "path": "packages/cli" }
+    {
+      "path": "packages/agent-loop"
+    },
+    {
+      "path": "packages/cli"
+    },
+    {
+      "path": "chapter2"
+    }
   ]
 }

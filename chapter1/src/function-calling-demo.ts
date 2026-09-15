@@ -48,8 +48,8 @@ export async function runFunctionCallingDemo(): Promise<void> {
   console.log("=".repeat(80));
   console.log(`Endpoint: POST ${baseURL.replace(/\/$/, "")}/responses`);
 
-  // 第一轮：模型可能发起多个并行工具调用
-  const round1Body = { model, input: question, tools, parallel_tool_calls: true, store: true };
+  // 第一轮：模型可能发起多个并行工具调用。使用 store: false，避免依赖服务端会话存储。
+  const round1Body = { model, input: question, tools, parallel_tool_calls: true, store: false };
   console.log("\n>>> ROUND 1 REQUEST");
   console.log(JSON.stringify(round1Body, null, 2));
 
@@ -82,11 +82,21 @@ export async function runFunctionCallingDemo(): Promise<void> {
     };
   });
 
-  // 第二轮：通过 previous_response_id 继续对话，仅补充工具输出
+  const replayedToolCalls = toolCalls.map((call) => ({
+    type: "function_call" as const,
+    call_id: call.call_id,
+    name: call.name,
+    arguments: call.arguments,
+  }));
+
+  // 第二轮：客户端带上原始 function_call 和工具输出，完整重建上下文。
   const round2Body = {
     model,
-    previous_response_id: resp1.id,
-    input: toolOutputs,
+    input: [
+      { role: "user" as const, content: question },
+      ...replayedToolCalls,
+      ...toolOutputs,
+    ],
     tools,
   };
 

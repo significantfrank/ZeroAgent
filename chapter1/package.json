@@ -4,8 +4,11 @@
   "type": "module",
   "scripts": {
     "start": "npx tsx src/index.ts",
+    "abort": "npx tsx src/index.ts abort",
     "logging": "npx tsx src/index.ts logging",
     "store": "npx tsx src/index.ts store",
+    "store-client": "npx tsx src/index.ts store-client",
+    "structured": "npx tsx src/index.ts structured",
     "stream": "npx tsx src/index.ts stream",
     "calling": "npx tsx src/index.ts calling"
   },

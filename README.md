@@ -3,19 +3,21 @@
 A **ReAct agent loop** for the **OpenAI Responses API**, written in TypeScript, with streaming output
 that keeps **reasoning**, **content** and **tool calls** on separate channels.
 
-This repository is a pnpm workspace containing two packages:
+This repository is a pnpm workspace containing two library packages and two tutorial projects:
 
 | Package | Description |
 | --- | --- |
 | [`@zero-agent/agent-loop`](packages/agent-loop) | The library. Agent loop, streaming Responses client, SSE parser, tool registry. **Zero runtime dependencies.** |
 | [`@zero-agent/cli`](packages/cli) | Interactive terminal app built on the library. |
+| [`chapter1`](chapter1) | Responses API capability demos. |
+| [`@zero-agent/chapter2`](chapter2) | Basic standalone ReAct Agent Loop tutorial. |
 
 ## Quick start
 
 ```bash
 pnpm install
 pnpm build          # tsc -b across the workspace
-pnpm test           # 168 tests (149 library + 19 CLI)
+pnpm test           # 169 tests (149 library + 19 CLI + 1 chapter2)
 
 pnpm demo           # offline end-to-end ReAct run against a local mock server — no API key needed
 pnpm cli --help     # interactive CLI (pnpm forwards arguments directly, so no "--")
@@ -93,6 +95,10 @@ packages/
     src/args.ts            pure argument parsing (no dependency on the library)
     test/args.test.ts      15 argument-parsing tests (no library dependency)
     test/cli.e2e.test.ts    4 tests that run the built CLI against a live SSE server
+chapter1/                  standalone Responses API demos
+  src/                      Store, streaming, structured output, cancellation and tools
+chapter2/                  basic standalone Agent Loop tutorial
+  src/                      Responses client, SSE parser, Agent Loop, CLI and tools
 ```
 
 ## How the workspace is wired

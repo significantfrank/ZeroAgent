@@ -1,0 +1,17 @@
+{
+    "name": "@zero-agent/chapter2",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "description": "A basic ReAct agent loop built on the Responses API.",
+    "scripts": {
+        "build": "tsc -b tsconfig.json",
+        "typecheck": "tsc -b tsconfig.json && tsc -p tsconfig.test.json",
+        "test": "node --test test/**/*.test.ts",
+        "start": "node src/index.ts"
+    },
+    "dependencies": {
+        "openai": "^7.15.0",
+        "winston": "^3.19.0"
+    }
+}

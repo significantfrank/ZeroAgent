@@ -10,7 +10,7 @@
   },
   "scripts": {
     "build": "tsc -b",
-    "clean": "tsc -b --clean && node -e \"const{rmSync}=require('node:fs');for(const p of ['agent-loop','cli'])rmSync('packages/'+p+'/dist',{recursive:true,force:true})\"",
+    "clean": "tsc -b --clean && node -e \"const{rmSync}=require('node:fs');for(const p of ['agent-loop','cli'])rmSync('packages/'+p+'/dist',{recursive:true,force:true});rmSync('chapter2/dist',{recursive:true,force:true})\"",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm build && pnpm -r test",
     "demo": "pnpm --filter @zero-agent/agent-loop demo",
