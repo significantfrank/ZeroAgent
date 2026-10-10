@@ -46,10 +46,10 @@ export class Agent {
         this.#maxSteps = options.maxSteps ?? 8;
     }
 
-    shouldEndLooping(finalAnswer: string | undefined, calls: Map<string, FunctionCallItem>, signal: AbortSignal | undefined, step: number, maxSteps: number): boolean {
+    shouldEndLooping(calls: Map<string, FunctionCallItem>, signal: AbortSignal | undefined, step: number, maxSteps: number): boolean {
         if (signal?.aborted === true) return true;
         if (step >= maxSteps) return true;
-        if (finalAnswer !== undefined || calls.size === 0) return true;
+        if (calls.size === 0) return true;
         return false;
     }
 
@@ -82,7 +82,7 @@ export class Agent {
                 logger.debug('log/request.log', JSON.stringify(request, null, 2));
                 for await (const event of this.#client.stream(request, signal)) {
                     logger.debug('log/event-type.log', event.type);
-                    if (event.type === 'response.reasoning_text.delta' || event.type === 'response.reasoning_summary_text.delta') {
+                    if (event.type === 'response.reasoning_text.delta') {
                         const delta = stringValue(event.delta) ?? '';
                         if (delta.length > 0) yield { type: AgentEventType.ReasoningDelta, step, delta };
                         continue;
@@ -128,12 +128,10 @@ export class Agent {
                     }
                 }
 
-                if (this.shouldEndLooping(finalAnswer, calls, signal, step, maxSteps)) {
+                if (this.shouldEndLooping(calls, signal, step, maxSteps)) {
                     yield { type: AgentEventType.StepEnd, step, toolCalls: calls.size };
                     yield { type: AgentEventType.RunEnd, steps: step, text: finalAnswer ?? text };
-                    completed = true;
-                    looping = false;
-                    continue;
+                    break;
                 }
 
                 const callList = [...calls.values()];
@@ -160,7 +158,7 @@ export class Agent {
                 yield { type: AgentEventType.StepEnd, step, toolCalls: calls.size };
             }
 
-            if (!completed && signal?.aborted !== true && step >= maxSteps) {
+            if (step >= maxSteps) {
                 yield { type: AgentEventType.Error, message: `Reached maxSteps (${maxSteps})`, step: maxSteps };
             }
         } catch (error) {

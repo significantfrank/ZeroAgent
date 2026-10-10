@@ -3,25 +3,26 @@
 A **ReAct agent loop** for the **OpenAI Responses API**, written in TypeScript, with streaming output
 that keeps **reasoning**, **content** and **tool calls** on separate channels.
 
-This repository is a pnpm workspace containing two library packages and two tutorial projects:
+This repository contains two reusable packages and two Responses API tutorial projects:
 
 | Package | Description |
 | --- | --- |
 | [`@zero-agent/agent-loop`](packages/agent-loop) | The library. Agent loop, streaming Responses client, SSE parser, tool registry. **Zero runtime dependencies.** |
 | [`@zero-agent/cli`](packages/cli) | Interactive terminal app built on the library. |
-| [`chapter1`](chapter1) | Responses API capability demos. |
-| [`@zero-agent/chapter2`](chapter2) | Basic standalone ReAct Agent Loop tutorial. |
+| [`chapter1`](chapter1) | Standalone Responses API capability demos. |
+| [`@zero-agent/chapter3`](chapter3) | Standalone ReAct Agent Loop tutorial with an interactive CLI. |
 
 ## Quick start
 
 ```bash
 pnpm install
-pnpm build          # tsc -b across the workspace
-pnpm test           # 169 tests (149 library + 19 CLI + 1 chapter2)
-
-pnpm demo           # offline end-to-end ReAct run against a local mock server — no API key needed
-pnpm cli --help     # interactive CLI (pnpm forwards arguments directly, so no "--")
+pnpm --filter @zero-agent/chapter3 start "What's the weather like in Tokyo?"
+pnpm --filter @zero-agent/chapter3 test
+pnpm demo            # offline library demo against a local mock server; no API key needed
 ```
+
+For the Responses API capability demos, see [`chapter1/README.md`](chapter1/README.md). For the
+library and packaged CLI, see [`packages/agent-loop/README.md`](packages/agent-loop/README.md).
 
 For local credentials and model settings, create a `.env` file in the repository root:
 
@@ -80,8 +81,8 @@ See [`packages/agent-loop/README.md`](packages/agent-loop/README.md) for the ful
 
 ```
 package.json               workspace root: private, dev tooling, aggregate scripts
-pnpm-workspace.yaml        packages/*
-tsconfig.json              solution file — `tsc -b` builds every referenced project
+pnpm-workspace.yaml        packages/* plus chapter projects
+tsconfig.json              root TypeScript solution references
 tsconfig.base.json         shared compiler options inherited by every package
 packages/
   agent-loop/              the library
@@ -93,21 +94,20 @@ packages/
   cli/                     the terminal app
     src/cli.ts             wiring and side effects
     src/args.ts            pure argument parsing (no dependency on the library)
-    test/args.test.ts      15 argument-parsing tests (no library dependency)
-    test/cli.e2e.test.ts    4 tests that run the built CLI against a live SSE server
-chapter1/                  standalone Responses API demos
-  src/                      Store, streaming, structured output, cancellation and tools
-chapter2/                  basic standalone Agent Loop tutorial
-  src/                      Responses client, SSE parser, Agent Loop, CLI and tools
+    test/                  CLI argument and end-to-end tests
+chapter1/                  standalone Responses API demos and its own npm package
+chapter3/                  workspace package with a standalone ReAct Agent Loop CLI
+  src/                      Responses client, Agent Loop, CLI, tools and event types
+  test/                     mocked SSE integration tests
 ```
 
 ## How the workspace is wired
 
 - **pnpm workspaces.** `@zero-agent/cli` depends on `@zero-agent/agent-loop` through
   `"workspace:*"`, which pnpm links into `packages/cli/node_modules`.
-- **TypeScript project references.** `tsc -b` at the root builds both projects in dependency order
-  from the solution-style `tsconfig.json`. The CLI declares
-  `"references": [{ "path": "../agent-loop" }]`, so it can never typecheck against a stale library.
+- **TypeScript project references.** The library and packaged CLI use project references; the CLI
+  references the library. The root `tsconfig.json` currently still references the removed `chapter2`
+  project and omits `chapter3`, so root-level build commands need that configuration updated.
 - **Each package emits to `dist`** (`composite: true`, declarations + declaration maps + source
   maps), and its `exports` map points at `dist`. That is what the CLI resolves through the
   `@zero-agent/agent-loop` specifier.
@@ -124,14 +124,15 @@ chapter2/                  basic standalone Agent Loop tutorial
 
 | Command | Effect |
 | --- | --- |
-| `pnpm build` | `tsc -b` — builds every package in dependency order |
-| `pnpm clean` | Removes build output via `tsc -b --clean` |
-| `pnpm typecheck` | `pnpm -r typecheck` — builds, then checks tests/examples with `noEmit` |
-| `pnpm test` | `pnpm -r test` — runs each package's `node --test` suite |
+| `pnpm build` | Root TypeScript build; currently fails because root `tsconfig.json` references removed `chapter2` |
+| `pnpm clean` | Cleans TypeScript output; root clean script still mentions removed `chapter2` |
+| `pnpm typecheck` | Runs `typecheck` in workspace packages |
+| `pnpm test` | Builds the workspace, then runs package test suites; currently blocked by the stale root `chapter2` reference |
 | `pnpm demo` | Offline ReAct demo from the library package |
-| `pnpm cli` | Builds, then runs the CLI (`pnpm cli --help`) |
+| `pnpm cli` | Builds, then runs the packaged CLI; currently blocked by the stale root `chapter2` reference |
 
-Per-package commands: `pnpm --filter @zero-agent/agent-loop <script>`.
+Per-package commands: `pnpm --filter @zero-agent/agent-loop <script>`,
+`pnpm --filter @zero-agent/cli <script>`, or `pnpm --filter @zero-agent/chapter3 <script>`.
 
 ## Requirements
 
@@ -140,15 +141,12 @@ dev dependencies are `typescript` and `@types/node`.
 
 ## Testing
 
-`pnpm test` builds the workspace and then runs 168 tests.
+Run the independent chapter3 test suite with:
 
-The **library** suite (149 tests) drives the agent against a **real** `node:http` server that speaks
-the Responses API SSE protocol, so the SSE parser, the streaming UTF-8 decoder, chunked transfer
-encoding, HTTP error mapping and the full ReAct loop are exercised end to end — including single-byte
-chunk fragmentation, connections dropped mid-stream, `429` retries, truncated streams and concurrency
-of parallel tool calls.
+```bash
+pnpm --filter @zero-agent/chapter3 test
+pnpm --filter @zero-agent/chapter3 typecheck
+```
 
-The **CLI** suite (19 tests) covers argument parsing in isolation, plus 4 integration tests that spawn
-the **built** CLI binary against a live mock server. Those are what verify the monorepo wiring: the
-CLI resolves `@zero-agent/agent-loop` through the pnpm workspace link into the library's `dist`, and a
-complete tool round-trip succeeds over real HTTP.
+The chapter3 test uses a mock `fetch` and SSE responses, so it requires no API key. The library and
+packaged CLI have their own test scripts; run them with the corresponding `pnpm --filter` command.
