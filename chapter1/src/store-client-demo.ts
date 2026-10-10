@@ -38,6 +38,7 @@ export async function runStoreClientDemo(): Promise<void> {
     const resp1 = await client.responses.create(round1Body);
 
     console.log("\n<<< ROUND 1 RESPONSE");
+    console.log(JSON.stringify(resp1, null, 2));
     console.log(`\nRound 1 output_text: ${resp1.output_text}`);
 
     history.push({ role: "assistant", content: resp1.output_text });

@@ -8,15 +8,15 @@
 
 ```bash
 pnpm install
-pnpm --filter @zero-agent/chapter2 start "What's the weather like in Tokyo?"
+pnpm --filter @zero-agent/chapter3 start "What's the weather like in Tokyo?"
 # 对支持 reasoning 的模型启用 reasoning
-pnpm --filter @zero-agent/chapter2 start --reasoning "Explain 258 * 263"
+pnpm --filter @zero-agent/chapter3 start --reasoning "Explain 258 * 263"
 ```
 
 `start` 直接执行 `src/index.ts`，不需要先构建 `dist`。如果需要验证编译产物，可以单独运行：
 
 ```bash
-pnpm --filter @zero-agent/chapter2 build
+pnpm --filter @zero-agent/chapter3 build
 ```
 
 配置环境变量：

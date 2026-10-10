@@ -34,7 +34,7 @@ importers:
         specifier: ^5.8.0
         version: 5.9.3
 
-  chapter2:
+  chapter3:
     dependencies:
       openai:
         specifier: ^7.15.0
