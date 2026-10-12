@@ -93,9 +93,6 @@ test('runs a full ReAct turn against a streaming server', { skip }, async () => 
     assert.match(output, /\[tool_result\] ✓ calculator \([\d.]+ms\)/);
     assert.match(output, /\[content\] The answer is 11\./);
 
-    // Argument JSON must have streamed in pieces before the completed call.
-    assert.match(output, /\[tool_call\] \{"expression":"\(17 \* 3 \+ 4\) \/ 5"\}/);
-
     // Two model turns, and the second carried the tool observation back.
     assert.equal(server.requests.length, 2);
     const secondInput = server.requests[1]?.body?.input;

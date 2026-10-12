@@ -43,6 +43,15 @@ importers:
         specifier: ^3.19.0
         version: 3.19.0
 
+  chapter4:
+    dependencies:
+      openai:
+        specifier: ^7.15.0
+        version: 7.15.0
+      winston:
+        specifier: ^3.19.0
+        version: 3.19.0
+
   packages/agent-loop:
     devDependencies:
       '@types/node':

@@ -1,0 +1,17 @@
+{
+    "name": "@zero-agent/chapter4",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "description": "A ReAct agent loop with file, terminal, and search tools.",
+    "scripts": {
+        "build": "tsc -b tsconfig.json",
+        "typecheck": "tsc -b tsconfig.json && tsc -p tsconfig.test.json",
+        "test": "node --test test/**/*.test.ts",
+        "start": "node src/index.ts"
+    },
+    "dependencies": {
+        "openai": "^7.15.0",
+        "winston": "^3.19.0"
+    }
+}
