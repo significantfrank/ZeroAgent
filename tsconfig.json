@@ -4,6 +4,7 @@
     { "path": "packages/agent-loop" },
     { "path": "packages/cli" },
     { "path": "chapter3" },
-    { "path": "chapter4" }
+    { "path": "chapter4" },
+    { "path": "chapter5" }
   ]
 }
