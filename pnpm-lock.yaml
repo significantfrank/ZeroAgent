@@ -67,6 +67,21 @@ importers:
         specifier: ^3.25.0
         version: 3.25.76
 
+  chapter6:
+    dependencies:
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.32.1
+        version: 1.32.1(zod@3.25.76)
+      openai:
+        specifier: ^7.15.0
+        version: 7.15.0(zod@3.25.76)
+      winston:
+        specifier: ^3.19.0
+        version: 3.19.0
+      zod:
+        specifier: ^3.25.0
+        version: 3.25.76
+
   packages/agent-loop:
     devDependencies:
       '@types/node':
