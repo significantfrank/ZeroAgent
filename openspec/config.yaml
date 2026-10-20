@@ -1,0 +1,26 @@
+schema: spec-driven
+
+context: |
+  Tech stack: TypeScript, Node.js ≥ 22.18, pnpm 11 monorepo
+  Build: tsc -b (project references, composite, erasableSyntaxOnly)
+  Runtime deps: zero (core library is dependency-free)
+  Test: Node built-in test runner; mocked fetch + SSE, no API key needed
+  Conventions: explicit .ts import extensions, separate tsconfig.test.json (noEmit)
+  Domain: ReAct agent loop on the OpenAI Responses API — educational tutorial series
+  Language: code and comments in English; article series in Chinese (从零构建Agent)
+
+rules:
+  proposal:
+    - Keep proposals under 1 page; focus on WHY not HOW
+    - Always list impacted packages (agent-loop, cli, chapter1, chapter3, etc.)
+  specs:
+    - Use SHALL/MUST for all normative requirements
+    - Every requirement must have at least one scenario with WHEN/THEN
+    - Scenario headers MUST use exactly 4 hashtags (####)
+  design:
+    - Include alternatives considered for each key decision
+    - Note any breaking changes to the public API (exports, AgentEvent types)
+  tasks:
+    - Break tasks into chunks completable in one session
+    - Order by dependency (what must be done first)
+    - Each task should be independently verifiable

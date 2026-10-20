@@ -175,12 +175,9 @@ export async function loadAllSkills(workdir: string): Promise<{
     const registry = new SkillRegistry();
     const loaded: LoadedSkill[] = [];
 
-    const dirs = [
-        { dir: userSkillsDir(), label: 'user' },
-        { dir: projectSkillsDir(workdir), label: 'project' },
-    ];
+    const dirs = [userSkillsDir(), projectSkillsDir(workdir)];
 
-    for (const { dir } of dirs) {
+    for (const dir  of dirs) {
         const skills = await loadSkillsFromDirectory(dir);
         for (const entry of skills) {
             registry.register(entry.skill);

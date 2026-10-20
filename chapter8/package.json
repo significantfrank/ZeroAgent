@@ -1,0 +1,20 @@
+{
+    "name": "@zero-agent/chapter8",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "description": "A ReAct agent loop with file, terminal, search tools, MCP support, and skills.",
+    "scripts": {
+        "build": "tsc -b tsconfig.json",
+        "typecheck": "tsc -b tsconfig.json && tsc -p tsconfig.test.json",
+        "test": "node --test test/**/*.test.ts",
+        "start": "node src/index.ts",
+        "mcp-server": "node src/mcp/server.ts"
+    },
+    "dependencies": {
+        "@modelcontextprotocol/sdk": "^1.32.1",
+        "openai": "^7.15.0",
+        "winston": "^3.19.0",
+        "zod": "^3.25.0"
+    }
+}

@@ -5,3 +5,4 @@ dist/
 *.log
 log/
 .vscode
+.pi

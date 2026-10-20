@@ -44,7 +44,6 @@ export class Agent {
     readonly #maxSteps: number;
     readonly #workdir: string;
     readonly #skills = new SkillRegistry();
-    #skillsLoaded = false;
 
     constructor(client: ResponsesClient, options: AgentOptions = {}) {
         this.#client = client;
@@ -63,20 +62,6 @@ export class Agent {
         return this.#skills;
     }
 
-    /**
-     * Load skills from user-level (`~/.zeroagent/skills/`) and project-level
-     * (`{workdir}/.zeroagent/skills/`) directories into the agent's registry.
-     * Safe to call multiple times — reloads from disk each time.
-     */
-    async loadSkills(): Promise<LoadedSkill[]> {
-        const loaded = await loadSkillsFromDisk(this.#workdir, this.#skills);
-        this.#skillsLoaded = true;
-        if (loaded.length > 0) {
-            logger.debug('log/agent.log', `Loaded ${loaded.length} skill(s): ${loaded.map((s) => s.skill.name).join(', ')}`);
-        }
-        return loaded;
-    }
-
     shouldEndLooping(calls: Map<string, FunctionCallItem>, signal: AbortSignal | undefined, step: number, maxSteps: number): boolean {
         if (signal?.aborted === true) return true;
         if (step >= maxSteps) return true;
@@ -85,10 +70,6 @@ export class Agent {
     }
 
     async *stream(input: string, options: AgentOptions = {}): AsyncGenerator<AgentEvent> {
-        // Load skills on first stream call if not already loaded
-        if (!this.#skillsLoaded) {
-            await this.loadSkills();
-        }
 
         const signal = options.signal;
         const maxSteps = options.maxSteps ?? this.#maxSteps;
@@ -103,7 +84,7 @@ export class Agent {
                 .addDeveloperMsg(`Working directory: ${this.#workdir}. Resolve relative paths from this directory.`)
                 .addUserMsg(input)
                 .setInstructions(this.#skills.buildPromptInstructions())
-                .setParallelToolCalls(false)
+                .setParallelToolCalls(true)
                 .setStore(false)
                 .setReasoning(options.reasoning ?? { effort: 'low' });
             for (const tool of await getAllToolsWithMcp()) {
