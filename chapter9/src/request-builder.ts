@@ -1,10 +1,10 @@
-import type { FunctionTool } from './tool/types.ts';
+import type { ToolDefinition } from './tool/types.ts';
 import type { InputItem, ReasoningConfig, ResponsesRequest } from './types.ts';
 
 export class PromptRequestBuilder {
     readonly #model: string;
     readonly #input: InputItem[] = [];
-    readonly #tools = new Map<string, FunctionTool>();
+    readonly #tools = new Map<string, ToolDefinition>();
     #instructions: string | undefined;
     #parallelToolCalls: boolean | undefined;
     #store: boolean | undefined;
@@ -34,7 +34,7 @@ export class PromptRequestBuilder {
         return this;
     }
 
-    addTool(tool: FunctionTool): this {
+    addTool(tool: ToolDefinition): this {
         this.#tools.set(tool.name, tool);
         return this;
     }

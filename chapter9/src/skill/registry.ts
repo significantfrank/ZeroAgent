@@ -1,5 +1,5 @@
 import type { SkillDefinition } from './types.ts';
-import type { FunctionTool } from '../tool/types.ts';
+import type { ToolDefinition } from '../tool/types.ts';
 
 /**
  * Registry for skills available to the agent.
@@ -100,8 +100,8 @@ export class SkillRegistry {
      * Collect all tools from all registered skills.
      * Returns an empty array if no skills have tools.
      */
-    collectTools(): readonly FunctionTool[] {
-        const tools: FunctionTool[] = [];
+    collectTools(): readonly ToolDefinition[] {
+        const tools: ToolDefinition[] = [];
         for (const skill of this.list()) {
             if (skill.tools !== undefined) {
                 tools.push(...skill.tools);

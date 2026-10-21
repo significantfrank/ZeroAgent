@@ -11,7 +11,7 @@ export type FunctionCallOutputItem = {
     output: string;
 };
 
-export type FunctionTool = {
+export type ToolDefinition = {
     type: 'function';
     name: string;
     description: string;

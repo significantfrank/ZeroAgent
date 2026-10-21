@@ -1,4 +1,4 @@
-import type { FunctionTool } from '../tool/types.ts';
+import type { ToolDefinition } from '../tool/types.ts';
 
 /**
  * Definition of a skill that can be loaded by the agent.
@@ -15,7 +15,7 @@ export type SkillDefinition = {
     /** Instruction text injected into the system prompt when the skill is active. */
     instructions: string;
     /** Optional tools that this skill exposes to the agent. */
-    tools?: readonly FunctionTool[];
+    tools?: readonly ToolDefinition[];
 };
 
 /**

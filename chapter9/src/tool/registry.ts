@@ -1,4 +1,4 @@
-import type { FunctionCallItem, ToolHandler, ToolResult } from './types.ts';
+import type { FunctionCallItem, ToolDefinition, ToolHandler, ToolResult } from './types.ts';
 import type { SubAgentDefinition } from '../subagent/types.ts';
 
 export function parseToolArguments(call: FunctionCallItem): Record<string, unknown> {
@@ -10,26 +10,32 @@ export function parseToolArguments(call: FunctionCallItem): Record<string, unkno
 }
 
 export class ToolRegistry {
-    readonly #handlers = new Map<string, ToolHandler>();
+    readonly #entries = new Map<string, { definition: ToolDefinition; handler: ToolHandler }>();
 
-    register(name: string, handler: ToolHandler): this {
-        this.#handlers.set(name, handler);
+    register(definition: ToolDefinition, handler: ToolHandler): this {
+        this.#entries.set(definition.name, { definition, handler });
         return this;
     }
 
-    copyFrom(source: ToolRegistry, agentDefinition: SubAgentDefinition): this {
-        for (const [name, handler] of source.#handlers) {
-            if (agentDefinition.tools?.[name] === true) this.register(name, handler);
+    copyFrom(source: ToolRegistry, agentDefinition?: SubAgentDefinition): this {
+        for (const [name, entry] of source.#entries) {
+            if (agentDefinition === undefined || agentDefinition.tools?.[name] === true) {
+                this.register(entry.definition, entry.handler);
+            }
         }
         return this;
     }
 
+    definitions(): ToolDefinition[] {
+        return [...this.#entries.values()].map((entry) => entry.definition);
+    }
+
     async execute(call: FunctionCallItem): Promise<ToolResult | undefined> {
-        const handler = this.#handlers.get(call.name);
-        if (handler === undefined) return undefined;
+        const entry = this.#entries.get(call.name);
+        if (entry === undefined) return undefined;
 
         try {
-            const result = await handler(call, parseToolArguments(call));
+            const result = await entry.handler(call, parseToolArguments(call));
             return typeof result === 'string'
                 ? { callId: call.call_id, name: call.name, output: result }
                 : result;

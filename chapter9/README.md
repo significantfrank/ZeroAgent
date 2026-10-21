@@ -19,7 +19,7 @@ Chapter 9 为 Agent Loop 增加一层任务委派能力。父 Agent 可调用 `r
 - 子 Agent 使用新的对话上下文，不会看到父 Agent 的对话历史或 session。
 - 子 Agent 继承父 Agent 当前使用的模型、工作目录和已加载 skills。
 - 子 Agent 可使用相同的本地工具和已连接的 MCP 工具，包括写文件与执行命令；委派任务时应明确限定操作范围。
-- 只允许一层委派。子 Agent 不会获得 `run_subagent` 工具，避免递归委派。
+- 子 Agent 可按自己的 `tools` 白名单继续调用 `run_subagent`，形成嵌套委派。
 
 ## 自定义 SubAgent
 

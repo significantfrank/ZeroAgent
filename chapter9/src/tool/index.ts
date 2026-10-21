@@ -2,6 +2,7 @@ export * from './types.ts';
 export { ToolRegistry, parseToolArguments } from './registry.ts';
 export {
     allTools,
+    createToolRegistryWithMcp,
     editFileTool,
     executeTool,
     fileSearchTool,

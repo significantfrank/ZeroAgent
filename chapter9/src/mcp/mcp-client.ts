@@ -2,7 +2,7 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import type { Transport } from '@modelcontextprotocol/sdk/shared/transport.js';
-import type { FunctionTool } from '../tool/types.ts';
+import type { ToolDefinition } from '../tool/types.ts';
 
 /**
  * An MCP tool as returned by the server, converted to our FunctionTool shape.
@@ -15,7 +15,7 @@ export type McpToolEntry = {
     /** The server that owns this tool. */
     serverName: string;
     /** The FunctionTool definition for the Responses API. */
-    tool: FunctionTool;
+    tool: ToolDefinition;
 };
 
 /**
@@ -84,7 +84,7 @@ export class McpClientManager {
             const result = await client.listTools();
             for (const mcpTool of result.tools) {
                 const prefixedName = `${serverName}__${mcpTool.name}`;
-                const tool: FunctionTool = {
+                const tool: ToolDefinition = {
                     type: 'function',
                     name: prefixedName,
                     description: mcpTool.description ?? `MCP tool: ${mcpTool.name}`,

@@ -1,7 +1,7 @@
 import { readFile as fsReadFile, writeFile as fsWriteFile } from 'node:fs/promises';
 import { exec } from 'node:child_process';
 import { promisify } from 'node:util';
-import type { FunctionCallItem, FunctionTool, ToolResult } from './types.ts';
+import type { FunctionCallItem, ToolDefinition, ToolResult } from './types.ts';
 import { McpClientManager } from '../mcp/mcp-client.ts';
 import { parseToolArguments, ToolRegistry } from './registry.ts';
 import type { Agent } from '../agent-loop.ts';
@@ -14,7 +14,7 @@ const execAsync = promisify(exec);
 // Tool definitions
 // ---------------------------------------------------------------------------
 
-export const weatherTool: FunctionTool = {
+export const weatherTool: ToolDefinition = {
     type: 'function',
     name: 'get_weather',
     description: 'Get the current weather for a city.',
@@ -27,7 +27,7 @@ export const weatherTool: FunctionTool = {
     strict: true,
 };
 
-export const readFileTool: FunctionTool = {
+export const readFileTool: ToolDefinition = {
     type: 'function',
     name: 'read_file',
     description: 'Read the contents of a local file. Returns the text content of the file.',
@@ -44,7 +44,7 @@ export const readFileTool: FunctionTool = {
     strict: false,
 };
 
-export const writeFileTool: FunctionTool = {
+export const writeFileTool: ToolDefinition = {
     type: 'function',
     name: 'write_file',
     description: 'Write content to a local file. Creates the file if it does not exist, overwrites if it does.',
@@ -60,7 +60,7 @@ export const writeFileTool: FunctionTool = {
     strict: true,
 };
 
-export const editFileTool: FunctionTool = {
+export const editFileTool: ToolDefinition = {
     type: 'function',
     name: 'edit_file',
     description: 'Edit a local file by replacing a specific text occurrence with new text.',
@@ -77,7 +77,7 @@ export const editFileTool: FunctionTool = {
     strict: true,
 };
 
-export const runTerminalCommandTool: FunctionTool = {
+export const runTerminalCommandTool: ToolDefinition = {
     type: 'function',
     name: 'run_terminal_command',
     description: 'Execute a shell command and return its stdout and stderr.',
@@ -92,7 +92,7 @@ export const runTerminalCommandTool: FunctionTool = {
     strict: true,
 };
 
-export const fileSearchTool: FunctionTool = {
+export const fileSearchTool: ToolDefinition = {
     type: 'function',
     name: 'file_search',
     description: 'Search for a pattern in files under a directory using grep. Returns matching lines with file paths and line numbers.',
@@ -108,7 +108,7 @@ export const fileSearchTool: FunctionTool = {
     strict: false,
 };
 
-export const loadSkillTool: FunctionTool = {
+export const loadSkillTool: ToolDefinition = {
     type: 'function',
     name: 'load_skill',
     description: 'Load the full instructions for an available skill before performing a task that matches it.',
@@ -121,7 +121,7 @@ export const loadSkillTool: FunctionTool = {
     strict: true,
 };
 
-export const runSubagentTool: FunctionTool = {
+export const runSubagentTool: ToolDefinition = {
     type: 'function',
     name: 'run_subagent',
     description: 'Delegate an independent task to a child agent and return its final result.',
@@ -135,7 +135,7 @@ export const runSubagentTool: FunctionTool = {
 };
 
 /** All local tools registered with the agent, in declaration order. */
-export const allTools: readonly FunctionTool[] = [
+export const allTools: readonly ToolDefinition[] = [
     weatherTool,
     readFileTool,
     writeFileTool,
@@ -156,10 +156,30 @@ export const mcpManager = new McpClientManager();
  * Build the complete tool list: local tools + all MCP tools discovered
  * from connected servers. Called by the agent before each run.
  */
-export async function getAllToolsWithMcp(): Promise<readonly FunctionTool[]> {
+export async function getAllToolsWithMcp(): Promise<readonly ToolDefinition[]> {
     const mcpEntries = await mcpManager.listAllTools();
     const mcpTools = mcpEntries.map((e) => e.tool);
     return [...allTools, ...mcpTools];
+}
+
+export async function createToolRegistryWithMcp(
+    source: ToolRegistry,
+    definition?: SubAgentDefinition,
+): Promise<ToolRegistry> {
+    const registry = new ToolRegistry().copyFrom(source, definition);
+    for (const entry of await mcpManager.listAllTools()) {
+        if (definition !== undefined && definition.tools?.[entry.prefixedName] !== true) continue;
+        registry.register(entry.tool, async (call, args) => {
+            const result = await mcpManager.callTool(call.name, args);
+            return {
+                callId: call.call_id,
+                name: call.name,
+                output: result.output,
+                error: result.error,
+            };
+        });
+    }
+    return registry;
 }
 
 function requireString(args: Record<string, unknown>, key: string): string {
@@ -240,32 +260,32 @@ async function handleFileSearch(args: { pattern: string; path?: string }): Promi
 
 export function registerBuiltInToolHandlers(agent: Agent): void {
     agent.tools
-        .register(weatherTool.name, (_call, args) => getWeather(requireString(args, 'city')))
-        .register(readFileTool.name, (_call, args) => handleReadFile({
+        .register(weatherTool, (_call, args) => getWeather(requireString(args, 'city')))
+        .register(readFileTool, (_call, args) => handleReadFile({
             path: requireString(args, 'path'),
             offset: optionalNumber(args, 'offset'),
             limit: optionalNumber(args, 'limit'),
         }))
-        .register(writeFileTool.name, (_call, args) => handleWriteFile({
+        .register(writeFileTool, (_call, args) => handleWriteFile({
             path: requireString(args, 'path'),
             content: requireString(args, 'content'),
         }))
-        .register(editFileTool.name, (_call, args) => handleEditFile({
+        .register(editFileTool, (_call, args) => handleEditFile({
             path: requireString(args, 'path'),
             old_text: requireString(args, 'old_text'),
             new_text: requireString(args, 'new_text'),
         }))
-        .register(runTerminalCommandTool.name, (_call, args) => handleRunTerminalCommand({
+        .register(runTerminalCommandTool, (_call, args) => handleRunTerminalCommand({
             command: requireString(args, 'command'),
         }))
-        .register(fileSearchTool.name, (_call, args) => {
+        .register(fileSearchTool, (_call, args) => {
             const path = args.path;
             return handleFileSearch({
                 pattern: requireString(args, 'pattern'),
                 path: typeof path === 'string' ? path : undefined,
             });
         })
-        .register(loadSkillTool.name, (call, args) => {
+        .register(loadSkillTool, (call, args) => {
             const skillName = requireString(args, 'name');
             const skill = agent.skills.get(skillName);
             if (skill === undefined) {
@@ -273,14 +293,14 @@ export function registerBuiltInToolHandlers(agent: Agent): void {
             }
             return `## Skill: ${skill.name}\n\n${skill.instructions}`;
         })
-        .register(runSubagentTool.name, async (_call, args) => {
+        .register(runSubagentTool, async (_call, args) => {
             const availableTools = await getAllToolsWithMcp();
             const definition: SubAgentDefinition = {
                 name: 'general',
                 description: 'General purpose child agent for independent tasks.',
                 mode: 'subagent',
                 systemPrompt: 'Complete the delegated task independently and return a concise, useful result.',
-                tools: Object.fromEntries(availableTools.map((tool) => [tool.name, tool.name !== runSubagentTool.name])),
+                tools: Object.fromEntries(availableTools.map((tool) => [tool.name, true])),
             };
             return runSubAgent(agent, requireString(args, 'task'), definition);
         });
@@ -290,16 +310,6 @@ export async function executeTool(
     call: FunctionCallItem,
     handlers: ToolRegistry,
 ): Promise<ToolResult> {
-    if (mcpManager.isMcpTool(call.name)) {
-        const args = parseToolArguments(call);
-        const mcpResult = await mcpManager.callTool(call.name, args);
-        return {
-            callId: call.call_id,
-            name: call.name,
-            output: mcpResult.output,
-            error: mcpResult.error,
-        };
-    }
     const result = await handlers.execute(call);
     return result ?? { callId: call.call_id, name: call.name, output: `Unknown tool: ${call.name}`, error: 'unknown_tool' };
 }

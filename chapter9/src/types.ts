@@ -1,7 +1,7 @@
 import type { SessionManager } from './session/manager.ts';
-import type { FunctionCallItem, FunctionCallOutputItem, FunctionTool } from './tool/types.ts';
+import type { FunctionCallItem, FunctionCallOutputItem, ToolDefinition } from './tool/types.ts';
 
-export type { FunctionCallItem, FunctionCallOutputItem, FunctionTool } from './tool/types.ts';
+export type { FunctionCallItem, FunctionCallOutputItem, ToolDefinition as FunctionTool } from './tool/types.ts';
 
 export type InputMessage = {
     role: 'user' | 'assistant' | 'developer' | 'system';
@@ -21,7 +21,7 @@ export type ResponsesRequest = {
     model: string;
     input: ResponseInput;
     instructions?: string;
-    tools?: readonly FunctionTool[];
+    tools?: readonly ToolDefinition[];
     parallel_tool_calls?: boolean;
     reasoning?: ReasoningConfig;
     stream?: boolean;

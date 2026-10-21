@@ -11,6 +11,7 @@ import {
     allTools,
     executeTool as dispatchTool,
     registerBuiltInToolHandlers,
+    runSubagentTool,
     ToolRegistry,
 } from '../src/tool/index.ts';
 import type { FunctionCallItem } from '../src/tool/types.ts';
@@ -245,7 +246,7 @@ Use the repository analysis workflow and write in Chinese.`);
     }
 });
 
-test('parent delegates to a one-level child agent and receives its result', async () => {
+test('parent delegates to a child agent that can delegate further', async () => {
     const realHome = process.env.HOME;
     const tempHome = await mkdtemp(join(tmpdir(), 'za-subagent-home-'));
     const workdir = await mkdtemp(join(tmpdir(), 'za-subagent-workdir-'));
@@ -324,7 +325,7 @@ test('parent delegates to a one-level child agent and receives its result', asyn
         const childFirstRequest = requests[1]!;
         assert.equal(childFirstRequest.model, 'test-model');
         assert.ok(childFirstRequest.tools.some((tool) => tool.name === 'get_weather'));
-        assert.ok(!childFirstRequest.tools.some((tool) => tool.name === 'run_subagent'));
+        assert.ok(childFirstRequest.tools.some((tool) => tool.name === 'run_subagent'));
         assert.ok(JSON.stringify(childFirstRequest.input).includes(`Working directory: ${workdir}`));
         assert.ok(JSON.stringify(childFirstRequest.input).includes('Find the weather in Tokyo.'));
         assert.ok(!JSON.stringify(childFirstRequest.input).includes('Research Tokyo weather'));
@@ -553,7 +554,7 @@ test('executeTool returns error for unknown tool', async () => {
 
 test('executeTool dispatches registered custom tool handlers', async () => {
     const handlers = new ToolRegistry();
-    handlers.register('run_subagent', (_call, args) => `Delegated: ${String(args.task)}`);
+    handlers.register(runSubagentTool, (_call, args) => `Delegated: ${String(args.task)}`);
 
     const result = await executeTool(makeCall('run_subagent', { task: 'Inspect the project.' }), handlers);
     assert.equal(result.error, undefined);

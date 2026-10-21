@@ -1,5 +1,5 @@
 import { ResponsesClient, type WireEvent } from './client.ts';
-import { executeTool, getAllToolsWithMcp, runSubagentTool, ToolRegistry } from './tool/index.ts';
+import { createToolRegistryWithMcp, executeTool, ToolRegistry } from './tool/index.ts';
 import { AgentEventType, type AgentEvent, type AgentOptions, type InputMessage } from './types.ts';
 import type { FunctionCallItem } from './tool/types.ts';
 import { logger } from './logger.ts';
@@ -51,7 +51,7 @@ export class Agent {
     readonly #skills = new SkillRegistry();
     readonly #sessionManager: SessionManager | undefined;
     #sessionId: string | undefined;
-    readonly #agentDefinition: SubAgentDefinition | undefined;
+    readonly #subAgentDef: SubAgentDefinition | undefined;
 
     constructor(
         client: ResponsesClient,
@@ -66,7 +66,7 @@ export class Agent {
         this.#agentType = agentType;
         this.#sessionManager = options.sessionManager;
         this.#sessionId = options.sessionId;
-        this.#agentDefinition = agentDefinition;
+        this.#subAgentDef = agentDefinition;
     }
 
     /** The agent's working directory. */
@@ -99,13 +99,17 @@ export class Agent {
     }
 
     createSubAgent(definition: SubAgentDefinition): Agent {
+        const childDefinition: SubAgentDefinition = {
+            ...definition,
+            tools: { ...definition.tools, load_skill: true },
+        };
         const child = new Agent(this.#client, {
-            model: definition.model ?? this.#model,
+            model: childDefinition.model ?? this.#model,
             maxSteps: this.#maxSteps,
             workdir: this.#workdir,
-        }, 'subagent', definition);
+        }, 'subagent', childDefinition);
         child.#skills.copyFrom(this.#skills);
-        child.#tools.copyFrom(this.#tools, definition);
+        child.#tools.copyFrom(this.#tools, childDefinition);
         return child;
     }
 
@@ -131,7 +135,7 @@ export class Agent {
         let step = 0;
 
         try {
-            const instructions = [this.#agentDefinition?.systemPrompt, this.#skills.buildPromptInstructions()]
+            const instructions = [this.#subAgentDef?.systemPrompt, this.#skills.buildPromptInstructions()]
                 .filter((part) => part !== undefined && part.length > 0)
                 .join('\n\n');
             const requestBuilder = new PromptRequestBuilder(model)
@@ -152,9 +156,12 @@ export class Agent {
 
             requestBuilder.addUserMsg(input);
 
-            for (const tool of await getAllToolsWithMcp()) {
-                if (this.#agentType === 'subagent' && tool.name === runSubagentTool.name) continue;
-                if (this.#agentDefinition !== undefined && this.#agentDefinition.tools?.[tool.name] !== true) continue;
+            const tools = await createToolRegistryWithMcp(
+                this.#tools,
+                this.#subAgentDef,
+            );
+
+            for (const tool of tools.definitions()) {
                 requestBuilder.addTool(tool);
             }
 
@@ -231,7 +238,7 @@ export class Agent {
                 const callList = [...calls.values()];
                 const pendingResults = callList.map((call) => ({
                     call,
-                    result: executeTool(call, this.#tools),
+                    result: executeTool(call, tools),
                 }));
                 for (const call of callList) {
                     requestBuilder.addInputItem(call);

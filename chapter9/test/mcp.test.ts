@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { McpClientManager, createInMemoryTransportPair } from '../src/mcp/mcp-client.ts';
-import { executeTool, mcpManager, getAllToolsWithMcp, ToolRegistry } from '../src/tool/index.ts';
+import { createToolRegistryWithMcp, executeTool, mcpManager, getAllToolsWithMcp, ToolRegistry } from '../src/tool/index.ts';
 import { createDemoServer } from '../src/mcp/server.ts';
 import type { FunctionCallItem } from '../src/tool/types.ts';
 
@@ -61,10 +61,8 @@ test('executeTool dispatches MCP echo tool', async () => {
     await server.connect(serverTransport);
     await mcpManager.connectTransport('echo-test', clientTransport);
 
-    // Populate the tool index
-    await mcpManager.listAllTools();
-
-    const result = await executeTool(makeCall('echo-test__echo', { text: 'hello mcp' }), emptyToolRegistry);
+    const tools = await createToolRegistryWithMcp(emptyToolRegistry);
+    const result = await executeTool(makeCall('echo-test__echo', { text: 'hello mcp' }), tools);
     assert.equal(result.error, undefined);
     assert.equal(result.output, 'hello mcp');
 

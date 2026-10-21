@@ -15,7 +15,7 @@ import {
     AgentRegistry,
     type AgentDefinition,
 } from '../src/subagent/index.ts';
-import { registerBuiltInToolHandlers, ToolRegistry } from '../src/tool/index.ts';
+import { fileSearchTool, readFileTool, registerBuiltInToolHandlers, ToolRegistry, writeFileTool } from '../src/tool/index.ts';
 
 function sse(events: readonly Record<string, unknown>[]): Response {
     const body = events.map((event) => `data: ${JSON.stringify(event)}\r\n\r\n`).join('');
@@ -115,9 +115,9 @@ Review the requested code.
 
 test('ToolRegistry.copyFrom copies only tool names enabled in AgentDefinition', async () => {
     const source = new ToolRegistry()
-        .register('read_file', () => 'read')
-        .register('file_search', () => 'search')
-        .register('write_file', () => 'write');
+        .register(readFileTool, () => 'read')
+        .register(fileSearchTool, () => 'search')
+        .register(writeFileTool, () => 'write');
     const target = new ToolRegistry().copyFrom(source, definition({
         tools: { read_file: true, file_search: true, write_file: false },
     }));
@@ -206,6 +206,7 @@ test('custom subagent applies its prompt and model and runs whitelisted tools', 
     assert.ok(requests[0]?.instructions?.includes('Review carefully.'));
     assert.ok(!requests[0]?.tools.some((tool) => tool.name === 'write_file'));
     assert.ok(requests[0]?.tools.some((tool) => tool.name === 'read_file'));
+    assert.ok(requests[0]?.tools.some((tool) => tool.name === 'load_skill'));
     assert.ok(JSON.stringify(requests[1]?.input).includes('1|import OpenAI from'));
     assert.ok(rendered.includes('[review subagent]'));
     assert.ok(rendered.some((line) => line.includes('[tool_call] read_file')));
