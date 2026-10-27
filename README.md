@@ -14,7 +14,7 @@ ZeroAgent 是一组循序渐进的 TypeScript 教程项目，演示如何基于 
 | [chapter7](chapter7) | SQLite session 持久化、workspace 恢复、多轮历史和会话命令 |
 | [chapter8](chapter8) | Markdown slash commands、位置参数和 prompt 模板展开 |
 | [chapter9](chapter9) | Chapter 8 当前实现的独立副本，作为后续章节的起点 |
-| [chapter10](chapter10) | OpenTUI terminal frontend、Node agent server 和 stdio NDJSON protocol |
+| [chapter10](chapter10) | model 管理：auth.json 多 provider 鉴权、models-config.json 模型配置、/models 与 /model 切换 |
 
 Chapter 2 尚未包含在当前 workspace 中。
 
@@ -57,6 +57,10 @@ Focus on: ${2:-correctness, style, and performance}
 ```
 
 交互模式支持 `/review <file>`、`/sessions`、`/resume <id>`、`/clear` 和 `/reload`。详见 [chapter8/README.md](chapter8/README.md)。
+
+## Chapter 10 示例
+
+Chapter 10 在 Chapter 9 基础上增加 model 管理：provider 鉴权放在 `~/.zeroagent/auth.json`，模型配置放在 `~/.zeroagent/models-config.json`。交互模式支持 `/models` 列出模型、`/model <id>` 切换，`/resume` 会恢复 session 记录的 model，`/reload` 会同时重载模型配置。详见 [chapter10/README.md](chapter10/README.md)。
 
 ## 验证
 

@@ -61,3 +61,10 @@ The `SessionManager` SHALL set the session title to the first 50 characters of t
 - **WHEN** the first message with role `user` and content "What is the weather in Tokyo?" is appended to a session with empty title
 - **THEN** the session's title SHALL be updated to "What is the weather in Tokyo?" (truncated to 50 chars if longer)
 
+### Requirement: setSessionModel updates a session's model
+The `SessionManager` SHALL provide `setSessionModel(id, model)` that updates the stored model for the session.
+
+#### Scenario: Active session model is updated
+- **WHEN** `setSessionModel(id, 'deepseek-flash')` is called for an existing session
+- **THEN** the session's stored model SHALL be `'deepseek-flash'`
+
