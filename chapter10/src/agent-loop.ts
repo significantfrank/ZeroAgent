@@ -210,7 +210,6 @@ export class Agent {
                 .addDeveloperMsg(`Working directory: ${this.#workdir}. Resolve relative paths from this directory.`)
                 .setInstructions(instructions)
                 .setParallelToolCalls(true)
-                .setReasoning(reasoning)
                 .setStore(false);
             if (reasoning !== undefined) requestBuilder.setReasoning(reasoning);
             if (definition?.maxTokens !== undefined) requestBuilder.setMaxOutputTokens(definition.maxTokens);
