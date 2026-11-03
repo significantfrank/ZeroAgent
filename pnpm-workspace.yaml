@@ -9,5 +9,6 @@ packages:
   - 'chapter9'
   - 'chapter10'
   - 'chapter11'
+  - 'chapter12'
 allowBuilds:
   esbuild: true
