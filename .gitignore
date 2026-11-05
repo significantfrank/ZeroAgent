@@ -1,5 +1,6 @@
 node_modules/
 dist/
+chapter13/.cache/
 .env
 auth.json
 .DS_Store

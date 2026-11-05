@@ -1,0 +1,63 @@
+{
+    "name": "@zero-agent/chapter13",
+    "version": "0.1.0",
+    "private": false,
+    "type": "module",
+    "description": "A TypeScript Agent SDK with OpenAI-compatible models and multi-agent orchestration.",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js"
+        },
+        "./cli": {
+            "types": "./dist/cli.d.ts",
+            "import": "./dist/cli.js"
+        },
+        "./session": {
+            "types": "./dist/session/index.d.ts",
+            "import": "./dist/session/index.js"
+        },
+        "./extensions": {
+            "types": "./dist/extension/index.d.ts",
+            "import": "./dist/extension/index.js"
+        },
+        "./models": {
+            "types": "./dist/model/index.d.ts",
+            "import": "./dist/model/index.js"
+        },
+        "./memory": {
+            "types": "./dist/memory/index.d.ts",
+            "import": "./dist/memory/index.js"
+        }
+    },
+    "files": [
+        "dist",
+        "README.md"
+    ],
+    "publishConfig": {
+        "access": "public"
+    },
+    "engines": {
+        "node": ">=22.18.0"
+    },
+    "scripts": {
+        "build": "tsc -b tsconfig.json",
+        "typecheck": "tsc -b tsconfig.json && tsc -p tsconfig.test.json",
+        "test": "node --test test/**/*.test.ts",
+        "test:tool": "node src/sdk/test-tool.ts",
+        "test:parallel": "node src/sdk/test-parellel.ts",
+        "test:hindsight": "node --test test/hindsight.integration.ts",
+        "start": "node src/cli.ts",
+        "mcp-server": "node src/mcp/server.ts"
+    },
+    "dependencies": {
+        "@modelcontextprotocol/sdk": "^1.32.1",
+        "@vectorize-io/hindsight-client": "^1.1.0",
+        "openai": "^7.15.0",
+        "winston": "^3.19.0",
+        "yaml": "^2.9.1",
+        "zod": "^3.25.0"
+    }
+}
